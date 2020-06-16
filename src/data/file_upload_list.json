@@ -1,0 +1,18 @@
+[
+  {
+    "filename" : "1gfile.txt",
+    "filesize" : "1GB"
+  },
+    {
+    "filename" : "100mfile.txt",
+    "filesize" : "100MB"
+  },
+    {
+    "filename" : "10mfile.txt",
+    "filesize" : "10MB"
+  },
+  {
+    "filename" : "1mfile.txt",
+    "filesize" : "1MB"
+  }
+]
