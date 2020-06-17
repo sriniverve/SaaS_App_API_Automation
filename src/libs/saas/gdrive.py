@@ -7,6 +7,7 @@ from google.auth.transport.requests import Request
 import requests
 from apiclient import errors
 from apiclient import http
+from apiclient.http import MediaFileUpload
 import json
 import io
 
@@ -24,7 +25,7 @@ def login_with_oauth():
         if os.path.exists('token.pickle'):
             with open('token.pickle', 'rb') as token:
                 creds = pickle.load(token)
-                # print(vars(creds))
+
         # If there are no (valid) credentials available, let the user log in.
         if not creds or not creds.valid:
             if creds and creds.expired and creds.refresh_token:
@@ -32,14 +33,13 @@ def login_with_oauth():
             else:
                 flow = InstalledAppFlow.from_client_secrets_file(
                     os.path.abspath(os.path.join('..', "credentials/credentials_gdrive.json")), SCOPES)
-                    # '/Users/skilladi/Documents/PyCharm Projects/SaaS_App_API_Automation/src/credentials/credentials_gdrive.json', SCOPES)
                 creds = flow.run_local_server(port=0)
             # Save the credentials for the next run
             with open('token.pickle', 'wb') as token:
                 pickle.dump(creds, token)
 
-        service = build('drive', 'v3', credentials=creds)
-        return service
+        return build('drive', 'v3', credentials=creds)
+
     except Exception as e:
         print("There seems to be a login error")
         print(e)
@@ -87,6 +87,7 @@ def get_file_list(service):
         print(e)
         return None
 
+
 def get_file_metadata(service, file_id):
     """get a file's metadata.
 
@@ -98,8 +99,8 @@ def get_file_metadata(service, file_id):
     """
 
     try:
-        file_metadata = service.files().get(fileId=file_id).execute()
-        return file_metadata
+        return service.files().get(fileId=file_id).execute()
+
 
     except Exception as e:
         print(f"An error occurred: {e}")
@@ -114,8 +115,7 @@ def get_file_content(service, file_id):
       File's content if successful, None otherwise.
     """
     try:
-        file_content = service.files().get_media(fileId=file_id).execute()
-        return file_content
+        return service.files().get_media(fileId=file_id).execute()
 
     except Exception as e:
         print(f"An error occurred: {e}")
@@ -162,19 +162,214 @@ def download_file(service, file_id, filename):
 
 def copy_file(service, origin_file_id, copy_title):
     """Copy an existing file.
-    Args:
+    :arg
       service: Drive API service instance.
       origin_file_id: ID of the origin file to copy.
       copy_title: Title of the copy.
 
-    Returns:
+    :returns
       The copied file if successful, None otherwise.
     """
     copied_file = {"name" : copy_title}
     try:
-        copy_status = service.files().copy(fileId=origin_file_id, body=copied_file).execute()
-        return copy_status
+        return service.files().copy(fileId=origin_file_id, body=copied_file).execute()
 
     except Exception as e:
         print(f"An error occurred: {e}")
+        return None
+
+
+def delete_file(service, file_id):
+    """Move a file to the trash.
+
+    :arg
+      service: Drive API service instance.
+      file_id: ID of the file to trash.
+
+    :returns
+      The updated file if successful, None otherwise.
+    """
+    try:
+        return service.files().delete(fileId=file_id).execute()
+    except Exception as e:
+        print(f"an error has occurred: {e}")
+    return None
+
+
+def upload_file(service, filename, filepath, mimetype):
+    """Upload a file to the drive.
+
+    :arg
+      service: Drive API service instance.
+      file_id: ID of the file to trash.
+
+    :returns
+      The updated file if successful, None otherwise.
+    """
+
+    try:
+        file_metadata = {"name": filename}
+        media = MediaFileUpload(f"{filepath}/{filename}", mimetype=mimetype)
+        file = service.files().create(body=file_metadata, media_body=media, fields="id").execute()
+        print("Upload successful")
+        return file.get('id')
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+
+def update_file(service, file_id, new_file_name, new_name, new_mime_type):
+    """Update an existing file's metadata and content.
+
+    :arg
+      service: Drive API service instance.
+      file_id: ID of the file to update.
+      new_title: New title for the file.
+      new_description: New description for the file.
+      new_mime_type: New MIME type for the file.
+      new_filename: Filename of the new content to upload.
+      new_revision: Whether or not to create a new revision for this file.
+    :returns
+      Updated file metadata if successful, None otherwise.
+    """
+
+    try:
+        # First retrieve the file from the API.
+        file = service.files().get(fileId=file_id).execute()
+
+        # File's new metadata.
+        file["name"] = new_name
+        file["description"] = new_description
+        file["mimeType"] = new_mime_type
+
+        # File's new content.
+        media_body = MediaFileUpload(
+            new_file_name, mimetype=new_mime_type, resumable=True)
+
+        # Send the request to the API.
+        updated_file = service.files().update(
+            fileId=file_id,
+            body=file,
+            newRevision=new_revision,
+            media_body=media_body).execute()
+        return updated_file
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
+
+
+def rename_file(service, file_id, new_name):
+    """Rename a file.
+
+    :arg
+      service: Drive API service instance.
+      file_id: ID of the file to rename.
+      new_title: New title for the file.
+    :returns
+      Updated file metadata if successful, None otherwise.
+    """
+
+    try:
+        file = {"name": new_name}
+        updated_file = service.files().update(fileId=file_id, body=file, fields="name").execute()
+        return updated_file
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
+
+
+def insert_file(service, folder_id, mime_type, filename):
+    """Insert new file.
+
+    :arg
+      service: Drive API service instance.
+      title: Title of the file to insert, including the extension.
+      description: Description of the file to insert.
+      parent_id: Parent folder's ID.
+      mime_type: MIME type of the file to insert.
+      filename: Filename of the file to insert.
+    :returns
+      Inserted file metadata if successful, None otherwise.
+    """
+
+    media_body = MediaFileUpload(filename, mimetype=mime_type, resumable=True)
+    body = {
+        "name": filename,
+        "mimeType": mime_type
+    }
+
+    # Set the parent folder
+    if folder_id:
+        body['parents'] = [{'id': folder_id}]
+
+    try:
+        return service.files().insert(body=body, media_body=media_body).execute()
+
+    except Exception as e:
+        print(f"an error has occurred: {e}")
+        return None
+
+
+def get_files_in_folder(service, folder_id):
+    """Print files belonging to a folder.
+
+    :arg
+        service: Drive API service instance.
+        folder_id: ID of the folder to print files from.
+    :returns
+        file_Id_list: Ids of the files present in the folder
+    """
+
+    page_token = None
+    file_Id_list = []
+    while True:
+        try:
+            param = {}
+            if page_token:
+                param['pageToken'] = page_token
+
+            children = service.children().list(folderId=folder_id, **param).execute()
+            for child in children.get('items', []):
+                print(child)
+                print(f"file_Id_listFile {child['id']}")
+
+            page_token = children.get('nextPageToken')
+            if not page_token:
+                break
+        except Exception as e:
+            print(f"an error has occurred: {e}")
+            break
+
+
+def find_folder_by_name(service, folder_name):
+    """searches for folders for a given folder name
+
+    :arg
+        service: Drive API service instance.
+        folder_name: Name of the folder to print files from.
+    :returns
+        folder_id: Id of the folder
+    """
+
+    try:
+        page_token = None
+        while True:
+            response = service.files().list(q="mimeType='application/vnd.google-apps.folder'",
+                                                  spaces='drive',
+                                                  fields='nextPageToken, files(id, name)',
+                                                  pageToken=page_token).execute()
+
+            for file in response.get('files', []):
+                print(f"Found folder: {file.get('name')}, {file.get('id')}")
+                if file.get('name') == folder_name:
+                    return file.get('id')
+
+            page_token = response.get('nextPageToken', None)
+            if page_token is None:
+                break
+
+    except Exception as e:
+        print(f"An error has occurred: {e}")
         return None

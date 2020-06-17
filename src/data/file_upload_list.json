@@ -1,18 +1,29 @@
 [
-  {
-    "filename" : "1gfile.txt",
-    "filesize" : "1GB"
-  },
     {
-    "filename" : "100mfile.txt",
-    "filesize" : "100MB"
-  },
+        "filename" : "1gfile.txt",
+        "filesize" : "1GB",
+        "mimetype" : "video/mp4",
+
+    },
     {
-    "filename" : "10mfile.txt",
-    "filesize" : "10MB"
-  },
-  {
-    "filename" : "1mfile.txt",
-    "filesize" : "1MB"
-  }
+        "filename" : "100mfile.txt",
+        "filesize" : "100MB",
+        "mimetype" : "image/jpeg",
+
+    },
+    {
+        "filename" : "10mfile.txt",
+        "filesize" : "10MB",
+        "mimetype" : "application/msword"
+    },
+    {
+        "filename" : "1mfile.txt",
+        "filesize" : "1MB",
+        "mimetype" : "application/vnd.ms-powerpoint"
+    },
+    {
+        "filename" : "1mfile.txt",
+        "filesize" : "1MB",
+        "mimetype" : "text/plain"
+    }
 ]
