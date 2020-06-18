@@ -1,29 +1,28 @@
 [
     {
-        "filename" : "1gfile.txt",
-        "filesize" : "1GB",
-        "mimetype" : "video/mp4",
+        "filename" : "Audio_File.mp3",
+        "mimetype" : "audio/mpeg"
 
     },
     {
-        "filename" : "100mfile.txt",
-        "filesize" : "100MB",
-        "mimetype" : "image/jpeg",
+        "filename" : "Excel_Document.xlsx",
+        "mimetype" : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
     },
     {
-        "filename" : "10mfile.txt",
-        "filesize" : "10MB",
-        "mimetype" : "application/msword"
+        "filename" : "Image_File.jpg",
+        "mimetype" : "image/jpeg"
     },
     {
-        "filename" : "1mfile.txt",
-        "filesize" : "1MB",
+        "filename" : "PDF_Document.pdf",
+        "mimetype" : "application/pdf"
+    },
+    {
+        "filename" : "PowerPoint_Document.ppt",
         "mimetype" : "application/vnd.ms-powerpoint"
     },
     {
-        "filename" : "1mfile.txt",
-        "filesize" : "1MB",
-        "mimetype" : "text/plain"
+        "filename" : "Word_Document.docx",
+        "mimetype" : "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     }
 ]
